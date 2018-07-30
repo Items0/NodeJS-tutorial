@@ -23,7 +23,7 @@ db.once('open', function () {
 });
 
 var coll = db.collection('userCollection');
-var counter = db.collection('counter');
+
 var User = mongoose.model('User', userSchema);
 
 /*
@@ -39,14 +39,15 @@ function getValueForNextSequence() {
 }
 */
 
-//Get all X
-server.route({
-    method: 'GET',
-    path: '/users',
-    handler: (request, h) => {
-        return coll.find({}).toArray();
-    }
-});
+//Get all
+server.route(
+    {
+        method: 'GET',
+        path: '/users',
+        handler: (request, h) => {
+            return coll.find({}).toArray();
+        }
+    });
 
 //Post
 server.route({
@@ -64,7 +65,7 @@ server.route({
     }
 });
 
-//Get one X
+//Get one
 server.route({
     method: 'GET',
     path: '/users/{userid}',
@@ -82,15 +83,14 @@ server.route({
         var userid = encodeURIComponent(request.params.userid);
         coll.updateOne(
             { _id: ObjectId(userid) },
-            { $set: { name: request.payload.name, surname: request.payload.surname, age: request.payload.age } },
-            { upsert: true }
+            { $set: { name: request.payload.name, surname: request.payload.surname, age: request.payload.age } }
         );
         return 'PUT operation complete';
     }
 });
 
 
-//Delete X
+//Delete
 server.route({
     method: 'DELETE',
     path: '/users/{userid}',
@@ -100,6 +100,18 @@ server.route({
         return 'DELETE user ' + userid;
     }
 });
+
+
+//Get list
+server.route(
+    {
+        method: 'GET',
+        path: '/userlist/{search?}',
+        handler: (request, h) => {
+            var search = encodeURIComponent(request.params.search);
+            return coll.distinct("name", { name: new RegExp(search, 'i') });
+        }
+    });
 
 const init = async () => {
 
@@ -112,7 +124,9 @@ const init = async () => {
     });
 
     await server.start();
+
     console.log(`Server running at: ${server.info.uri}`);
+
 };
 
 process.on('unhandledRejection', (err) => {
