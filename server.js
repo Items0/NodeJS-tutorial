@@ -102,7 +102,7 @@ server.route({
 });
 
 
-//Get list
+//Get filtered list
 server.route(
     {
         method: 'GET',
